@@ -1,0 +1,15 @@
+#!/usr/bin/env perl
+
+use open qw<:encoding(UTF-8)>;
+use Repo::Packages qw< digest packages >;
+
+my @packages = packages("/Users/tmp/Documents/mojo-repository/deb");
+
+for my $package (@packages){
+    for(@$package){ 
+        for(@$_){
+            print $_ . "\n" 
+        }
+
+    }
+}

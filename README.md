@@ -1,2 +1,3 @@
 # repo
-create repository
+generates Packages.gz and creates on device repository
+
