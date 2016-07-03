@@ -90,4 +90,4 @@ sub digest {
 sub packages {
     $find_deb->(shift);
 }
-
+1;

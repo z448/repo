@@ -1,15 +1,15 @@
 #!/usr/bin/env perl
 
+use Mojolicious::Lite;
 use open qw<:encoding(UTF-8)>;
 use Repo::Packages qw< digest packages >;
 
-my @packages = packages("/Users/tmp/Documents/mojo-repository/deb");
+plugin( 'Directory', root => "/Users/tmp/Documents/mojo-repository" )->start;
 
-for my $package (@packages){
-    for(@$package){ 
-        for(@$_){
-            print $_ . "\n" 
-        }
+my $packages = packages("/Users/tmp/Documents/repo/deb");
 
+for my $package (@$packages){
+    for(@$package){
+        print $_ . "\n";
     }
-}
+};
