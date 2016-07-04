@@ -1,15 +1,17 @@
 # repo
-generates Packages.gz and creates on device repository
 
+Creates Packages.gz and starts repository on localhost:3000
 
-###Usage:
+# SYNOPSIS
 
-```bash
-	start:	repo -d /path/to/deb/directory daemon
-	stop:	repo -s
-	help	repo -h
-```
+repo creates Packages.gz file needed by APT client to read content of repository, then starts repository running on Mojolicious server on localhost:3000. On iOS you can then add "localhost:3000" into Cydia sources.
 
+# USAGE
 
+start:                  `repo -d /path/to/deb daemon`
 
+start in background:    `nohup repo -d /path/to/deb daemon&`
 
+stop:                   `repo -s`
+
+usage:                  `repo -h`

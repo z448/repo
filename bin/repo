@@ -50,6 +50,7 @@ sub stop {
 
 sub usage {
     say "\nUsage:\n\tstart:\trepo -d /path/to/deb/directory daemon";
+    say "\tstart in background:    nohup repo -d /path/to/deb daemon&"
     say "\tstop:\trepo -s";
     say "\thelp\trepo -h";
     say "\n\n";
@@ -62,4 +63,26 @@ if(defined $switch{d}){
 } elsif(defined $switch{s}){
     stop();
 }
+
+=head1 repo
+
+Creates Packages.gz and starts repository on localhost:3000
+
+=head1 SYNOPSIS
+
+repo creates Packages.gz file needed by APT client to read content of repository, then starts repository running on Mojolicious server on localhost:3000
+
+=head1 USAGE
+
+start:                  C<repo -d /path/to/deb daemon>
+
+start in background:    C<nohup repo -d /path/to/deb daemon&>
+
+stop:                   C<repo -s>
+
+usage:                  C<repo -h>
+
+=cut
+
+
 
