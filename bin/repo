@@ -1,15 +1,65 @@
 #!/usr/bin/env perl
 
+use 5.010;
+use warnings;
+use strict;
+
 use Mojolicious::Lite;
+use File::Find;
+use File::Path;
+use Getopt::Std;
 use open qw<:encoding(UTF-8)>;
 use Repo::Packages qw< digest packages >;
 
-plugin( 'Directory', root => "/Users/tmp/Documents/mojo-repository" )->start;
+my %switch = ();
+my $pid = $$;
+getopts('d:hs', \%switch);
 
-my $packages = packages("/Users/tmp/Documents/repo/deb");
+sub start {
+    mkpath("/tmp/_repo/");
+    system("rm -rf /tmp/_repo/repo_*");
+    open(my $fh,">", "/tmp/_repo/repo_$pid") || die "cant open /tmp/_repo/repo_$pid: $!";
+    print $fh $pid;
+    close $fh;
 
-for my $package (@$packages){
-    for(@$package){
-        print $_ . "\n";
-    }
-};
+    my $packages = packages($switch{d});
+    my $base_dir = $switch{d}; $base_dir =~ s/(.*?)(\/deb)/$1/;
+    unlink( "$base_dir/Packages", "$base_dir/Packages.gz" );
+    open($fh,">>", "$base_dir/Packages") || die "cant open $base_dir/Packages: $!";
+    
+    for my $package (@$packages){
+        for(@$package){
+            print $fh "$_\n";
+        }
+    };
+    close $fh;
+    system("cd $base_dir && gzip Packages");
+
+    plugin( 'Directory', root => "$base_dir" )->start;
+}
+
+sub stop {
+    
+    find( sub{ 
+            if(/repo_/){
+                s/(repo_)(.*)/$2/;
+                say "killing $_";
+                system("kill -9 $_");
+            }}, "/tmp/_repo/" )
+}
+
+sub usage {
+    say "\nUsage:\n\tstart:\trepo -d /path/to/deb/directory daemon";
+    say "\tstop:\trepo -s";
+    say "\thelp\trepo -h";
+    say "\n\n";
+}
+
+if(defined $switch{d}){
+    start();
+} elsif(defined $switch{h}){
+    usage();
+} elsif(defined $switch{s}){
+    stop();
+}
+
