@@ -9,7 +9,7 @@ use File::Find;
 use File::Path;
 use Getopt::Std;
 use open qw<:encoding(UTF-8)>;
-use Repo::Packages qw< digest packages >;
+use App::Repo qw< digest packages >;
 
 my %switch = ();
 my $pid = $$;
@@ -50,7 +50,7 @@ sub stop {
 
 sub usage {
     say "\nUsage:\n\tstart:\trepo -d /path/to/deb/directory daemon";
-    say "\tstart in background:    nohup repo -d /path/to/deb daemon&"
+    say "\tstart in background:    nohup repo -d /path/to/deb daemon&";
     say "\tstop:\trepo -s";
     say "\thelp\trepo -h";
     say "\n\n";
@@ -64,7 +64,7 @@ if(defined $switch{d}){
     stop();
 }
 
-=head1 repo
+=head1 NAME repo
 
 Creates Packages.gz and starts repository on localhost:3000
 

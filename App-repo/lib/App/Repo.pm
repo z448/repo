@@ -1,4 +1,4 @@
-package Repo::Packages;
+package App::Repo;
 use Data::Dumper;
 use Digest::SHA qw< sha1_hex sha256_hex >;
 use Digest::MD5 qw< md5_hex >;
@@ -13,6 +13,7 @@ require Exporter;
 
 our @ISA = qw(Exporter);
 our @EXPORT_OK = ( 'digest', 'packages' );
+our $VERSION = '0.01';
 
 
 my @deb_files = ();
