@@ -9,6 +9,12 @@ use File::Copy;
 use warnings;
 use strict;
 
+=head1 NAME
+ 
+App::Repo - creates Packages.gz and starts APT repository
+ 
+=cut
+
 require Exporter;
 
 our @ISA = qw(Exporter);
