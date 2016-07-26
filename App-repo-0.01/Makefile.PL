@@ -4,7 +4,7 @@ use warnings;
 use ExtUtils::MakeMaker;
 
 WriteMakefile(
-    NAME             => 'App::repo',
+    NAME             => 'App::Repo',
     AUTHOR           => q{Zdenek Bohunek <zed448@icloud.com>},
     VERSION_FROM     => 'lib/App/Repo.pm',
     ABSTRACT_FROM    => 'lib/App/Repo.pm',

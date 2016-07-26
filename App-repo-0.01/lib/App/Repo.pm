@@ -11,7 +11,7 @@ use strict;
 
 =head1 NAME
  
-App::Repo - creates Packages.gz and starts APT repository
+App::Repo - creates Packages list and starts APT repository
  
 =cut
 
@@ -19,7 +19,7 @@ require Exporter;
 
 our @ISA = qw(Exporter);
 our @EXPORT_OK = ( 'digest', 'packages' );
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 
 my @deb_files = ();

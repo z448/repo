@@ -8,22 +8,28 @@ use Mojolicious::Lite;
 use File::Find;
 use File::Path;
 use Getopt::Std;
-use open qw<:encoding(UTF-8)>;
+use App::Repo::Daemon qw< daemonize >;
 use App::Repo qw< digest packages >;
+use open qw<:encoding(UTF-8)>;
 
 my %switch = ();
+$0 = "repo";
 my $pid = $$;
-getopts('d:hs', \%switch);
+
+getopts('d:p:hs', \%switch);
+
 
 sub start {
-    mkpath("/tmp/_repo/");
-    system("rm -rf /tmp/_repo/repo_*");
-    open(my $fh,">", "/tmp/_repo/repo_$pid") || die "cant open /tmp/_repo/repo_$pid: $!";
+    daemonize();
+    stop();
+    mkpath("/tmp/.repo/pid");
+    open(my $fh,">", "/tmp/.repo/pid/$pid") || die "cant open /tmp/.repo/pid/$pid: $!";
     print $fh $pid;
     close $fh;
 
     my $packages = packages($switch{d});
-    my $base_dir = $switch{d}; $base_dir =~ s/(.*?)(\/deb)/$1/;
+    my $base_dir = $switch{d} || $ENV{HOME}; $base_dir =~ s/(.*?)(\/deb)/$1/;
+
     unlink( "$base_dir/Packages", "$base_dir/Packages.gz" );
     open($fh,">>", "$base_dir/Packages") || die "cant open $base_dir/Packages: $!";
     
@@ -35,26 +41,27 @@ sub start {
     close $fh;
     system("cd $base_dir && gzip Packages");
 
-    plugin( 'Directory', root => "$base_dir" )->start;
+    plugin( 'Directory', root => "$base_dir" )->start('daemon', '-l', "http://*:3000");
 }
 
 sub stop {
-    
     find( sub{ 
-            if(/repo_/){
-                s/(repo_)(.*)/$2/;
-                say "killing $_";
-                system("kill -9 $_");
-            }}, "/tmp/_repo/" )
+                unless($_ eq '.' or $_ eq '..'){ 
+                    my $pid = "$_" + 1;
+                    say "killing: repo $pid";
+                    system("kill -9 $pid");
+                    unlink("/tmp/.repo/pid/$_");
+                }
+            }, "/tmp/.repo/pid" );
 }
 
 sub usage {
-    say "\nUsage:\n\tstart:\trepo -d /path/to/deb/directory daemon";
-    say "\tstart in background:    nohup repo -d /path/to/deb daemon&";
+    say "\nUsage:\n\tstart:\trepo -d /path/to/deb";
     say "\tstop:\trepo -s";
     say "\thelp\trepo -h";
     say "\n\n";
 }
+
 
 if(defined $switch{d}){
     start();
@@ -66,7 +73,7 @@ if(defined $switch{d}){
 
 =head1 NAME repo
 
-Creates Packages.gz and starts repository on localhost:3000
+Creates Packages list and starts repository on localhost:3000
 
 =head1 SYNOPSIS
 
