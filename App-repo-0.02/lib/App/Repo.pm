@@ -19,23 +19,12 @@ require Exporter;
 
 our @ISA = qw(Exporter);
 our @EXPORT_OK = ( 'digest', 'packages' );
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 
 my @deb_files = ();
-my $stash = '/tmp/.repo';
 my $url_base = 'https://api.metacpan.org/source';
-
-my $init = sub {
-    unless( -d "$stash/tmp" ){
-        mkpath( "$stash/tmp" );
-        #chmod( 0755, $tmp_dir);
-        print "\nUsing curl to get dependencies\n $stash <<<getopts.pl ";
-        system("curl -#kL $url_base/ZEFRAM/Perl4-CoreLibs-0.003/lib/getopts.pl > $stash/getopts.pl");
-        print " $stash <<<ar";
-        system("curl -#kL $url_base/BDFOY/PerlPowerTools-1.007/bin/ar > $stash/ar");
-    }
-}; $init->();
+my $stash = `perldoc -l App::Repo`; $stash =~ s/\.pm//;
 
 my $digest = sub {
     my $file = shift;

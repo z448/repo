@@ -14,24 +14,18 @@ use open qw<:encoding(UTF-8)>;
 
 my %switch = ();
 $0 = "repo";
-my $pid = $$;
-
 getopts('d:p:hs', \%switch);
 
 
 sub start {
+    say "starting repo";
     daemonize();
-    stop();
-    mkpath("/tmp/.repo/pid");
-    open(my $fh,">", "/tmp/.repo/pid/$pid") || die "cant open /tmp/.repo/pid/$pid: $!";
-    print $fh $pid;
-    close $fh;
 
     my $packages = packages($switch{d});
     my $base_dir = $switch{d} || $ENV{HOME}; $base_dir =~ s/(.*?)(\/deb)/$1/;
 
     unlink( "$base_dir/Packages", "$base_dir/Packages.gz" );
-    open($fh,">>", "$base_dir/Packages") || die "cant open $base_dir/Packages: $!";
+    open(my $fh,">>", "$base_dir/Packages") || die "cant open $base_dir/Packages: $!";
     
     for my $package (@$packages){
         for(@$package){
@@ -44,20 +38,8 @@ sub start {
     plugin( 'Directory', root => "$base_dir" )->start('daemon', '-l', "http://*:3000");
 }
 
-sub stop {
-    find( sub{ 
-                unless($_ eq '.' or $_ eq '..'){ 
-                    my $pid = "$_" + 1;
-                    say "killing: repo $pid";
-                    system("kill -9 $pid");
-                    unlink("/tmp/.repo/pid/$_");
-                }
-            }, "/tmp/.repo/pid" );
-}
-
 sub usage {
     say "\nUsage:\n\tstart:\trepo -d /path/to/deb";
-    say "\tstop:\trepo -s";
     say "\thelp\trepo -h";
     say "\n\n";
 }
@@ -67,9 +49,7 @@ if(defined $switch{d}){
     start();
 } elsif(defined $switch{h}){
     usage();
-} elsif(defined $switch{s}){
-    stop();
-}
+} 
 
 =head1 NAME repo
 
@@ -81,11 +61,7 @@ repo creates Packages.gz file needed by APT client to read content of repository
 
 =head1 USAGE
 
-start:                  C<repo -d /path/to/deb daemon>
-
-start in background:    C<nohup repo -d /path/to/deb daemon&>
-
-stop:                   C<repo -s>
+start:                  C<repo -d /path/to/deb>
 
 usage:                  C<repo -h>
 
