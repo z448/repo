@@ -6,7 +6,7 @@ Creates Packages.gz and starts repository on localhost:3000
 
 ```bash
 #switch to root
-cpan App::repo
+cpan App::Repo
 ```
 
 # SYNOPSIS
