@@ -15,11 +15,7 @@ repo creates Packages.gz file needed by APT client to read content of repository
 
 # USAGE
 
-start:                  `repo -d /path/to/deb daemon`
-
-start in background:    `nohup repo -d /path/to/deb daemon&`
-
-stop:                   `repo -s`
+start:                  `repo -d /path/to/ded`
 
 usage:                  `repo -h`
 
