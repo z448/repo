@@ -15,7 +15,7 @@ repo creates Packages.gz file needed by APT client to read content of repository
 
 # USAGE
 
-start:                  `repo -d /path/to/ded`
+start:                  `repo -d /path/to/deb`
 
 usage:                  `repo -h`
 
