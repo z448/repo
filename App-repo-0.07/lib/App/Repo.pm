@@ -19,7 +19,7 @@ require Exporter;
 
 our @ISA = qw(Exporter);
 our @EXPORT_OK = ( 'digest', 'packages' );
-our $VERSION = '0.05';
+our $VERSION = '0.07';
 
 
 my @deb_files = ();
