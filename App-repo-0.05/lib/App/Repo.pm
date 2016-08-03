@@ -24,17 +24,15 @@ our $VERSION = '0.05';
 
 my @deb_files = ();
 my $url_base = 'https://api.metacpan.org/source';
-my $stash = '/tmp/.repo';
-#my $stash = `perldoc -l App::Repo`; $stash =~ s/\.pm//;
+my $stash = '$ENV{HOME}/tmp/.repo';
 
 sub init {
-    unless( -d "/tmp/.repo" ){
-        mkpath( "/tmp/.repo" );
-        #chmod( 0755, $tmp_dir);
-        print "\nUsing curl to get dependencies\n /tmp/.repo <<<getopts.pl ";
-        system("curl -#kL $url_base/ZEFRAM/Perl4-CoreLibs-0.003/lib/getopts.pl > /tmp/.repo/getopts.pl");
-        print " /tmp/.repo <<<ar";
-        system("curl -#kL $url_base/BDFOY/PerlPowerTools-1.007/bin/ar > /tmp/.repo/ar");
+    unless( -d "$ENV{HOME}/tmp/.repo" ){
+        mkpath( "$ENV{HOME}/tmp/.repo" );
+        print "\nUsing curl to get dependencies\n $ENV{HOME}/tmp/.repo <<<getopts.pl ";
+        system("curl -#kL $url_base/ZEFRAM/Perl4-CoreLibs-0.003/lib/getopts.pl > $ENV{HOME}/tmp/.repo/getopts.pl");
+        print " $ENV{HOME}/tmp/.repo <<<ar";
+        system("curl -#kL $url_base/BDFOY/PerlPowerTools-1.007/bin/ar > $ENV{HOME}/tmp/.repo/ar");
     }
 }; init();
 
