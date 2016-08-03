@@ -24,7 +24,7 @@ our $VERSION = '0.05';
 
 my @deb_files = ();
 my $url_base = 'https://api.metacpan.org/source';
-my $stash = '$ENV{HOME}/tmp/.repo';
+my $stash = "$ENV{HOME}/tmp/.repo";
 
 sub init {
     unless( -d "$ENV{HOME}/tmp/.repo" ){
@@ -56,9 +56,11 @@ my $digest = sub {
 my $content = sub {
     my( $dir, $file ) = @_;
     my @control = ();
+
+    mkpath("$stash/tmp");
     if($file =~ /\.deb/){
         copy("$dir/$file", "$stash/tmp");
-        system("cd $stash/tmp && perl -I $stash $stash/ar -x $file && tar -xf control.tar.gz");
+        system("cd $stash/tmp && perl -I$stash $stash/ar -x $file && tar -xf control.tar.gz");
         open(my $fh,"<","$stash/tmp/control") || die "cant open $stash/tmp/control: $!";
         system("rm -rf $stash/tmp/*");
         while(<$fh>){

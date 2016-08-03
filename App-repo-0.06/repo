@@ -14,7 +14,7 @@ use open qw<:encoding(UTF-8)>;
 
 my %switch = ();
 $0 = "repo";
-getopts('d:p:hs', \%switch);
+getopts('d:h', \%switch);
 
 
 sub start {
