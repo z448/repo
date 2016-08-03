@@ -35,6 +35,15 @@ sub start {
     close $fh;
     system("cd $base_dir && gzip Packages");
 
+    my $repo_icon_path = sub {
+        my $repo_lib_dir = `perldoc -l App::Repo`; chomp $repo_lib_dir;
+        $repo_lib_dir =~ s/\.pm/\/CydiaIcon\.png/;
+        return $repo_lib_dir;
+    };
+    
+    my $repo_icon = $repo_icon_path->();
+    system("cp $repo_icon $base_dir/");
+
     plugin( 'Directory', root => "$base_dir" )->start('daemon', '-l', "http://*:3000");
 }
 
