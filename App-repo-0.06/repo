@@ -22,9 +22,9 @@ sub start {
     daemonize();
 
     my $packages = packages($switch{d});
-    my $base_dir = $switch{d} || $ENV{HOME}; $base_dir =~ s/(.*?)(\/deb)/$1/;
+    my $base_dir = $switch{d}; $base_dir =~ s/(\/deb)//;
 
-    unlink( "$base_dir/Packages", "$base_dir/Packages.gz" );
+    system("rm -rf $base_dir/Packages*");
     open(my $fh,">>", "$base_dir/Packages") || die "cant open $base_dir/Packages: $!";
     
     for my $package (@$packages){

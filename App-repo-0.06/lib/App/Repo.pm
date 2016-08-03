@@ -59,6 +59,7 @@ my $content = sub {
 
     mkpath("$stash/tmp");
     if($file =~ /\.deb/){
+        my $file_size = -s "$dir/$file";
         copy("$dir/$file", "$stash/tmp");
         system("cd $stash/tmp && perl -I$stash $stash/ar -x $file && tar -xf control.tar.gz");
         open(my $fh,"<","$stash/tmp/control") || die "cant open $stash/tmp/control: $!";
@@ -68,12 +69,15 @@ my $content = sub {
             chomp;
             push @control, $_;
         }
+        push @control, 'Size: ' . $file_size;
+        push @control, 'Filename: ' . "deb/$file"; 
         push @control, 'MD5sum: ' . $digest->("$dir/$file")->{'md5'};
         push @control, 'SHA1: ' . $digest->("$dir/$file")->{'sha1'};
         push @control, 'SHA256: ' . $digest->("$dir/$file")->{'sha256'};
         push @control, "\n";
         return \@control;
-    } else { die "no deb file" }
+    }
+    #} else { warn "no deb file" }
 };
 
 my $find_deb = sub {
