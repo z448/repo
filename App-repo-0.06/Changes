@@ -1,3 +1,3 @@
-0.06: CydiaIcon.png is copied to same directory as Packages.gz, used as repository icon in Cydia on iOS
+0.06: CydiaIcon.png is copied to same directory as Packages.gz, used as repository icon in Cydia on iOS; Packages.gz now containFile Size and Filename fields
 0.02: changed usage; repo now goes into backgroud by default
 
