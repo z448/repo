@@ -41,7 +41,9 @@ sub start {
     };
     
     my $repo_icon = $repo_icon_path->();
-    system("cp $repo_icon $base_dir/");
+    unless( -f "$base_dir/CydiaIcon.png" ){
+        system("cp $repo_icon $base_dir/");
+    }
 
     daemonize();
     plugin( 'Directory', root => "$base_dir" )->start('daemon', '-l', "http://*:3000");
