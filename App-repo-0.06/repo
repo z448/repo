@@ -19,7 +19,6 @@ getopts('d:h', \%switch);
 
 sub start {
     say "starting repo";
-    daemonize();
 
     my $packages = packages($switch{d});
     my $base_dir = $switch{d}; $base_dir =~ s/(\/deb)//;
@@ -44,6 +43,7 @@ sub start {
     my $repo_icon = $repo_icon_path->();
     system("cp $repo_icon $base_dir/");
 
+    daemonize();
     plugin( 'Directory', root => "$base_dir" )->start('daemon', '-l', "http://*:3000");
 }
 
