@@ -53,7 +53,7 @@ if(defined $switch{d}){
 
 =head1 NAME
 
-repo - Creates APT Packages list and starts repository on localhost:3000
+repo - Creates list of Debian packages and starts APT repository on localhost:3000.
 
 =head1 DESCRIPTION 
 
