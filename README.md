@@ -12,14 +12,14 @@ repo - Creates list of Debian packages and starts APT repository on localhost:30
 
 # INSTALLATION
 
-- Install via C<cpan>
+- Install via cpan
 
 ```bash
 # switch to root
 cpan App::Repo
 ```
 
-- or compile and install it yourself as 'root'
+- or compile and install it yourself
 
 ```bash
 # switch to root
@@ -33,7 +33,7 @@ make install
 
 # OPTIONS
 
-Pass full path to 'deb' directory containing Debian packages with -d parameter. Repo will generate 'Packages.gz' file in a same directory where 'deb' is located. 
+-d parameter takes full path to `deb` directory containing .deb files. Repo will generate 'Packages.gz' file in a same directory where 'deb' is located and starts APT repository on localhost:3000. To stop repository search for 'repo' process (`ps -ef | grep repo`) and kill it. 
 
 start:                  `repo -d /path/to/deb`
 
