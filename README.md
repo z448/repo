@@ -24,7 +24,7 @@ cpan App::Repo
 ```bash
 # switch to root
 git clone https://github.com/z448/repo
-cd repo/App-repo-0.05
+cd repo/App-repo-0.07
 perl Makefile.PL
 make
 make install
