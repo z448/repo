@@ -30,6 +30,7 @@ make
 make install
 ```
 
+- or if are on iOS, add `http://load.sh/cydia/` repository and search for `repo`
 
 # OPTIONS
 
