@@ -4,7 +4,7 @@ repo - Creates list of Debian packages and starts APT repository on localhost:30
 
 # DESCRIPTION 
 
-'repo' creates MD5, SHA1 and SHA256 hashes of each package in 'deb' directory, checks control file and use it to create Packages.gz file needed by APT client to read content of repository, then starts repository running on Mojolicious server ( localhost:3000 ). 'repo' has dependency on 'curl', it's using it to download perl implementation of 'ar' archiver on first run which is saved into `$HOME/tmp/.repo` directory.
+**repo** creates MD5, SHA1 and SHA256 hashes of each package in `deb` directory, checks control file and use it to create `Packages.gz` file needed by APT client to read content of repository, then starts repository running on Mojolicious server ( **localhost:3000** ). **repo** has dependency on **curl**, it's using it to download perl implementation of 'ar' archiver on first run which is saved into `$HOME/tmp/.repo` directory.
 
 # GIF
 
