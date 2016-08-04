@@ -1,6 +1,6 @@
 # NAME
 
-repo - Creates list of Debian packages and starts APT repository on localhost:3000.
+**repo** - Creates list of Debian packages and starts APT repository on localhost:3000.
 
 # DESCRIPTION 
 
