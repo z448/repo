@@ -14,11 +14,10 @@ use open qw<:encoding(UTF-8)>;
 
 my %switch = ();
 $0 = "repo";
-getopts('d:h', \%switch);
+getopts('d:hr', \%switch);
 
 
 sub start {
-    say "starting repo";
 
     my $packages = packages($switch{d});
     my $base_dir = $switch{d}; $base_dir =~ s/(\/deb)//;
@@ -45,13 +44,19 @@ sub start {
         system("cp $repo_icon $base_dir/");
     }
 
+    if( defined $switch{r} ){ say "refreshed"; return }
+
+    say "starting repo";
+
     daemonize();
     plugin( 'Directory', root => "$base_dir" )->start('daemon', '-l', "http://*:3000");
 }
 
 sub usage {
-    say "\nUsage:\n\tstart:\trepo -d /path/to/deb";
-    say "\thelp\trepo -h";
+    say "\nUsage:\n\tstart:\t\t\trepo -d /path/to/deb";
+    say "\trefresh packages\trepo -d ~/path/to/deb -r"; 
+    say "\thelp:\t\t\trepo -h";
+    say "\tdocumentation:\t\tperldoc repo";
     say "\n\n";
 }
 
@@ -77,6 +82,8 @@ See GIF at L<https://github.com/z448/repo>
 Pass full path to 'deb' directory containing Debian packages with -d parameter. Repo will generate 'Packages.gz' file in a same directory where 'deb' is located. 
 
 start:                  C<repo -d /path/to/deb>
+
+refresh packages:       C<repo -d /path/to/deb -r>
 
 usage:                  C<repo -h>
 

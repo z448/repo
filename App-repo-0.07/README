@@ -20,6 +20,8 @@ OPTIONS
 
     start: `repo -d /path/to/deb'
 
+    refresh packages: `repo -d /path/to/deb -r'
+
     usage: `repo -h'
 
 AUTHOR
