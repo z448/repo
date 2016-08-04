@@ -38,6 +38,8 @@ make install
 
 start:                  `repo -d /path/to/deb`
 
+refresh packages:       `repo -d /path/to/deb -p`
+
 usage:                  `repo -h`
 
 # AUTHOR
