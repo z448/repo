@@ -14,7 +14,7 @@ use open qw<:encoding(UTF-8)>;
 
 my %switch = ();
 $0 = "repo";
-getopts('d:hr', \%switch);
+getopts('d:hp', \%switch);
 
 
 sub start {
@@ -44,7 +44,7 @@ sub start {
         system("cp $repo_icon $base_dir/");
     }
 
-    if( defined $switch{r} ){ say "refreshed"; return }
+    if( defined $switch{p} ){ say "refreshed"; return }
 
     say "starting repo";
 
@@ -54,7 +54,7 @@ sub start {
 
 sub usage {
     say "\nUsage:\n\tstart:\t\t\trepo -d /path/to/deb";
-    say "\trefresh packages\trepo -d ~/path/to/deb -r"; 
+    say "\trefresh packages\trepo -d ~/path/to/deb -p"; 
     say "\thelp:\t\t\trepo -h";
     say "\tdocumentation:\t\tperldoc repo";
     say "\n\n";
@@ -83,7 +83,7 @@ Pass full path to 'deb' directory containing Debian packages with -d parameter. 
 
 start:                  C<repo -d /path/to/deb>
 
-refresh packages:       C<repo -d /path/to/deb -r>
+refresh packages:       C<repo -d /path/to/deb -p>
 
 usage:                  C<repo -h>
 
