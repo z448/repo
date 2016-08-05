@@ -1,7 +1,7 @@
 package App::Repo::Agent;
 
 use 5.010;
-use LWP::Curl;
+use Mojo::UserAgent;
 use Data::Dumper;
 use Digest::SHA qw< sha1_hex sha256_hex >;
 use Digest::MD5 qw< md5_hex >;
@@ -28,12 +28,13 @@ our $VERSION = '0.01';
 
 my $base_path = "$ENV{HOME}/.repo/stash";
 
-my $curl = LWP::Curl->new(
-    user_agent   => 'Telesphoreo APT-HTTP/1.0.592',
-    #agent => 'Cydia/0.9 CFNetwork/711.4.6 Darwin/14.0.0',
-    timeout => 10,
-    maxredirs => 10,
-);
+my $ua = Mojo::UserAgent->new;
+#my $curl = LWP::Curl->new(
+#    user_agent   => 'Telesphoreo APT-HTTP/1.0.592',
+#    #agent => 'Cydia/0.9 CFNetwork/711.4.6 Darwin/14.0.0',
+#    timeout => 10,
+#    maxredirs => 10,
+#);
 
 sub get_packages {
     my $repo_url = shift; $repo_url =~ s/\/$//;
@@ -44,9 +45,16 @@ sub get_packages {
         my $packages_tmp_file = "$base_path/$_";
         say "packages_tmp_file: $packages_tmp_file";
         say "trying $repo_url/$_";
-        my $system = system("curl --user-agent \"Telesphoreo APT-HTTP/1.0.592\" -kLo $packages_tmp_file $repo_url/$_");
-        say "system: $system";
+        #my $system = system("curl --user-agent \"Telesphoreo APT-HTTP/1.0.592\" -kLo $packages_tmp_file $repo_url/$_");
+        #say "system: $system";
 
+        my $tx = $ua->get("$repo_url/$_");
+        if (my $res = $tx->success) { 
+            return parse_control($repo_url, $res->body, $_);
+            #open(my $fh,"> :raw :bytes",$packages_tmp_file);
+            #print $fh $res->body;
+            #close $fh;
+        } else { say "doesnt exist: $_" }
         #my $res = $curl->get("$repo_url/$_");
         #if($res->is_success){
         #open(my $fh,"> :raw :bytes",$packages_tmp_file);
@@ -54,20 +62,22 @@ sub get_packages {
         #        close $fh;
         #        }
     }
-    return parse_control($repo_url, "Packages.gz");
 }
 
 sub parse_control {
-    my( $repo_url, $packages_tmp_file ) = @_;
+    my( $repo_url, $packages_tmp_file, $file_type ) = @_;
     my( @packages, %packages, $i ) = ();
+    open(my $fh,"> :raw :bytes", "$base_path/$file_type");
+    print $fh $packages_tmp_file;
+    close $fh;
 
-    if( -f "$base_path/Packages.gz"){
+    if( $file_type =~ /\.gz/){
         say "gz exist";
-        system("gunzip -f $base_path/Packages.gz");
+        #system("gunzip -f $base_path/Packages.gz");
     } 
-    if( -f "$base_path/Packages.bz2"){
+    if( $file_type =~ /\.bz2/ ){
         say "bz2 exist";
-        system("bzcat $base_path/Packages.bz2 > $base_path/Packages");
+        system("bzip2 -f $base_path/Packages.bz2");
     }
 
     if( -f "$base_path/Packages"){
