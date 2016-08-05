@@ -31,7 +31,7 @@ sub start {
         }
     };
     close $fh;
-    system("cd $base_dir && gzip Packages");
+    system("cd $base_dir && cp Packages Packages.txt && gzip Packages");
 
     my $repo_icon_path = sub {
         my $repo_lib_dir = `perldoc -l App::Repo`; chomp $repo_lib_dir;
@@ -49,7 +49,15 @@ sub start {
     say "starting repo";
 
     daemonize();
-    plugin( 'Directory', root => "$base_dir" )->start('daemon', '-l', "http://*:3000");
+
+    app->static->paths->[0] = $base_dir;
+    any '/' => sub {
+        shift->reply->static('Packages.txt');
+    };
+
+    app->start('daemon');
+
+#plugin( 'Directory', root => "$base_dir" )->start('daemon', '-l', "http://*:3000");
 }
 
 sub usage {

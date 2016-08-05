@@ -19,7 +19,7 @@ WriteMakefile(
         'Test::More' => 0,
     },
     PREREQ_PM => {
-         'Mojolicious::Plugin::Directory'   =>  '0.11',
+         'Mojolicious'   =>  '7.01',
     },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES => 'App-repo*' },
