@@ -26,7 +26,7 @@ our @ISA = qw(Exporter);
 our @EXPORT_OK = qw< get_repos_url get_packages >;
 our $VERSION = '0.01';
 
-$ENV{MOJO_NO_TLS} = 1;
+$ENV{MOJO_NO_TLS} = 0;
 $ENV{MOJO_MAX_REDIRECTS} = 15;
 my $base_path = "$ENV{HOME}/.repo/stash";
 
@@ -60,10 +60,10 @@ sub get_packages {
         #say "trying $repo_url/$_" if $ENV{REPO_DEBUG};;
 
         my $tx = $ua->get("$repo_url/$_");
-        say "$repo_url/$_";
+        #say "$repo_url/$_";
         if (my $res = $tx->success) { 
-            say "SUCCESS FILE: $_";
-            return parse_control($res->body, "$_") and last;
+            return parse_control($res->body, "$_");
+            last;
         } 
     }
 }
@@ -76,11 +76,11 @@ sub parse_control {
     close $fh;
 
     if( $file_type =~ /\.gz/){
-        say "gz exist";
+        #say "gz exist";
         system("mv $base_path/Packages.gz $base_path/Packages");
     } 
     if( $file_type =~ /\.bz2/ ){
-        say "bz2 exist";
+        #say "bz2 exist";
         system("bzcat $base_path/Packages.bz2 > $base_path/Packages");
     }
 
