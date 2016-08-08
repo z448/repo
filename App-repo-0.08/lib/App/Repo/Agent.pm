@@ -23,18 +23,28 @@ App::Repo - creates Packages list and starts APT repository
 require Exporter;
 
 our @ISA = qw(Exporter);
-our @EXPORT_OK = ( 'printer' );
+our @EXPORT_OK = qw< get_repos_url get_packages >;
 our $VERSION = '0.01';
 
+$ENV{MOJO_MAX_REDIRECTS} = 5;
 my $base_path = "$ENV{HOME}/.repo/stash";
 
 my $ua = Mojo::UserAgent->new;
-#my $curl = LWP::Curl->new(
-#    user_agent   => 'Telesphoreo APT-HTTP/1.0.592',
-#    #agent => 'Cydia/0.9 CFNetwork/711.4.6 Darwin/14.0.0',
-#    timeout => 10,
-#    maxredirs => 10,
-#);
+
+sub get_repos_url {
+    my $url = 'https://raw.githubusercontent.com/jonluca/MasterRepo/master/MasterRepo.list';
+    my @repo_url = ();
+    my $tx = $ua->get("$url");
+    if (my $res = $tx->success) {
+        open(my $fh,'<',\$res->body);
+        while(<$fh>){
+            s/(.*deb\ )(.*?)(\ .*)/$2/;
+            push @repo_url, $2;
+        }
+        close $fh;
+        return \@repo_url;
+    }
+}
 
 sub get_packages {
     my $repo_url = shift; $repo_url =~ s/\/$//;
@@ -45,22 +55,11 @@ sub get_packages {
         my $packages_tmp_file = "$base_path/$_";
         say "packages_tmp_file: $packages_tmp_file";
         say "trying $repo_url/$_";
-        #my $system = system("curl --user-agent \"Telesphoreo APT-HTTP/1.0.592\" -kLo $packages_tmp_file $repo_url/$_");
-        #say "system: $system";
 
         my $tx = $ua->get("$repo_url/$_");
         if (my $res = $tx->success) { 
             return parse_control($repo_url, $res->body, $_);
-            #open(my $fh,"> :raw :bytes",$packages_tmp_file);
-            #print $fh $res->body;
-            #close $fh;
-        } else { say "doesnt exist: $_" }
-        #my $res = $curl->get("$repo_url/$_");
-        #if($res->is_success){
-        #open(my $fh,"> :raw :bytes",$packages_tmp_file);
-        #        print $fh $res->content;
-        #        close $fh;
-        #        }
+        } else { next }
     }
 }
 
@@ -73,11 +72,11 @@ sub parse_control {
 
     if( $file_type =~ /\.gz/){
         say "gz exist";
-        #system("gunzip -f $base_path/Packages.gz");
+        system("gunzip -f $base_path/Packages.gz");
     } 
     if( $file_type =~ /\.bz2/ ){
         say "bz2 exist";
-        system("bzip2 -f $base_path/Packages.bz2");
+        system("bzcat $base_path/Packages.bz2 > $base_path/Packages");
     }
 
     if( -f "$base_path/Packages"){
@@ -118,7 +117,9 @@ sub printer {
     my @p = @{get_packages(shift)};
     my %lenght = ();
     for(@p){
-        print colored(['white on_cyan'],"$_->{number}") . " $_->{Name}" . colored(['blue']," - ");
+        my $number_align = 3 - length $_->{number};
+        my $random_offset = rand(int(15));
+        print " "x($random_offset) . "$_->{Name}" . colored(['yellow'],'__') . colored(['black on_yellow'],"$_->{number}") . colored(['black on_yellow']," "x($number_align)) . "\n";
     }
 }
 
