@@ -26,10 +26,12 @@ our @ISA = qw(Exporter);
 our @EXPORT_OK = qw< get_repos_url get_packages >;
 our $VERSION = '0.01';
 
-$ENV{MOJO_MAX_REDIRECTS} = 5;
+$ENV{MOJO_NO_TLS} = 1;
+$ENV{MOJO_MAX_REDIRECTS} = 15;
 my $base_path = "$ENV{HOME}/.repo/stash";
 
 my $ua = Mojo::UserAgent->new;
+$ua->transactor->name('Telesphoreo APT-HTTP/1.0.592');
 
 sub get_repos_url {
     my $url = 'https://raw.githubusercontent.com/jonluca/MasterRepo/master/MasterRepo.list';
@@ -53,27 +55,29 @@ sub get_packages {
 
     mkpath($base_path);
     for(@packages_list){
-        my $packages_tmp_file = "$base_path/$_";
-        say "packages_tmp_file: $packages_tmp_file" if $ENV{REPO_DEBUG};
-        say "trying $repo_url/$_" if $ENV{REPO_DEBUG};;
+        #my $packages_tmp_file = "$base_path/$_";
+        #say "packages_tmp_file: $packages_tmp_file" if $ENV{REPO_DEBUG};
+        #say "trying $repo_url/$_" if $ENV{REPO_DEBUG};;
 
         my $tx = $ua->get("$repo_url/$_");
+        say "$repo_url/$_";
         if (my $res = $tx->success) { 
-            return parse_control($repo_url, $res->body, $_);
-        } else { next }
+            say "SUCCESS FILE: $_";
+            return parse_control($res->body, "$_") and last;
+        } 
     }
 }
 
 sub parse_control {
-    my( $repo_url, $packages_tmp_file, $file_type ) = @_;
+    my( $stream, $file_type ) = @_;
     my( @packages, %packages, $i ) = ();
     open(my $fh,"> :raw :bytes", "$base_path/$file_type");
-    print $fh $packages_tmp_file;
+    print $fh $stream;
     close $fh;
 
     if( $file_type =~ /\.gz/){
         say "gz exist";
-        system("gunzip -f $base_path/Packages.gz");
+        system("mv $base_path/Packages.gz $base_path/Packages");
     } 
     if( $file_type =~ /\.bz2/ ){
         say "bz2 exist";
@@ -83,15 +87,15 @@ sub parse_control {
     if( -f "$base_path/Packages"){
         open(my $fh, '<', "$base_path/Packages") || die "cant open $base_path/Packages: $!";
         while(<$fh>){ 
-            if( /\:\ /){ 
-                s/(.*?)(\:\ )(.*)/$1$2$3/;
-                my($key, $value) = ($1, $3); chomp $value;
+            if( /\:/){ 
+                s/(.*?)(\:\ ?)(.*)/$1$2$3/;
+                my($key, $value) = ($1, $3); chomp $value; $key = lc $key;
                 $packages{$key} = $value;
             } else { 
-                $packages{url} = "$repo_url/$packages{Filename}";
-                $packages{number} = $i++;
-                $packages{repository} = $repo_url;
-                $packages{t} = $repo_url;
+                #$packages{url} = "$repo_url/$packages{Filename}";
+                #$packages{number} = $i++;
+                #$packages{repository} = $repo_url;
+                #$packages{t} = $repo_url;
                 push @packages, { %packages };
             }
         }
@@ -99,19 +103,23 @@ sub parse_control {
     return \@packages;
 }
 
+#print Dumper(get_packages("$ARGV[0]"));
+
 __DATA__
+
 sub printer {
     my @p = @{get_packages(shift)};
     my %lenght = ();
     for(@p){
         my $number_align = 3 - length $_->{number};
         my $random_offset = rand(int(15));
-        print " "x($random_offset) . "$_->{Name}" . colored(['yellow'],'__') . colored(['black on_yellow'],"$_->{number}") . colored(['black on_yellow']," "x($number_align)) . "\n";
+        print " "x($random_offset) . "$_->{name}" . colored(['yellow'],'__') . colored(['black on_yellow'],"$_->{number}") . colored(['black on_yellow']," "x($number_align)) . "\n";
     }
 }
 
-#printer("$ARGV[0]");
+printer("$ARGV[0]");
 
+__DATA__
 sub read_json {
     open(my $fh,"<", "$base_path/packages.json") || die "cant open: $base_path/packages.json: $!";
     my $json = <$fh>;

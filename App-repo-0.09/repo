@@ -67,9 +67,8 @@ sub printer {
     my @p = @{get_packages($url)};
     my %lenght = ();
     for(@p){
-        my $number_align = 3 - length $_->{number};
         my $random_offset = rand(int(15));
-        print " "x($random_offset) . "$_->{Name}" . colored(['yellow'],'__') . colored(['black on_yellow'],"v".$_->{Version}) . "\n";
+        print " "x($random_offset) . "$_->{name}" . colored(['yellow'],'__') . colored(['black on_yellow'],"v".$_->{version}) . "\n";
         #print " "x($random_offset) . "$_->{Name}" . colored(['yellow'],'__') . colored(['black on_yellow'],$_->{Version}) . colored(['black on_yellow'],"$_->{number}") . colored(['black on_yellow']," "x($number_align)) . "\n";
     }
 }
