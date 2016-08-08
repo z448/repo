@@ -47,14 +47,15 @@ sub get_repos_url {
 }
 
 sub get_packages {
-    my $repo_url = shift; $repo_url =~ s/\/$//;
+    my $repo_url = shift; 
+    $repo_url =~ s/\/$//;
     my @packages_list = qw( Packages Packages.bz2 Packages.gz );
 
     mkpath($base_path);
     for(@packages_list){
         my $packages_tmp_file = "$base_path/$_";
-        say "packages_tmp_file: $packages_tmp_file";
-        say "trying $repo_url/$_";
+        say "packages_tmp_file: $packages_tmp_file" if $ENV{REPO_DEBUG};
+        say "trying $repo_url/$_" if $ENV{REPO_DEBUG};;
 
         my $tx = $ua->get("$repo_url/$_");
         if (my $res = $tx->success) { 
@@ -98,7 +99,18 @@ sub parse_control {
     return \@packages;
 }
 
-#print Dumper(get_packages("$ARGV[0]"));
+__DATA__
+sub printer {
+    my @p = @{get_packages(shift)};
+    my %lenght = ();
+    for(@p){
+        my $number_align = 3 - length $_->{number};
+        my $random_offset = rand(int(15));
+        print " "x($random_offset) . "$_->{Name}" . colored(['yellow'],'__') . colored(['black on_yellow'],"$_->{number}") . colored(['black on_yellow']," "x($number_align)) . "\n";
+    }
+}
+
+#printer("$ARGV[0]");
 
 sub read_json {
     open(my $fh,"<", "$base_path/packages.json") || die "cant open: $base_path/packages.json: $!";
@@ -113,17 +125,6 @@ sub write_json {
     print $fh $json;
 }
 
-sub printer {
-    my @p = @{get_packages(shift)};
-    my %lenght = ();
-    for(@p){
-        my $number_align = 3 - length $_->{number};
-        my $random_offset = rand(int(15));
-        print " "x($random_offset) . "$_->{Name}" . colored(['yellow'],'__') . colored(['black on_yellow'],"$_->{number}") . colored(['black on_yellow']," "x($number_align)) . "\n";
-    }
-}
-
-
 #my @url = grep { $_->{Name} } @{get_packages("$ARGV[0]")};
 #for(@url){
 #    say $_->{url};
@@ -133,7 +134,6 @@ sub printer {
 
 
 
-printer("$ARGV[0]");
 #for(@p){ say $_->{Name} };
 
 __DATA__

@@ -5,16 +5,18 @@ use warnings;
 use strict;
 
 use Mojolicious::Lite;
+use Term::ANSIColor;
 use File::Find;
 use File::Path;
 use Getopt::Std;
 use App::Repo::Daemon qw< daemonize >;
 use App::Repo qw< digest packages >;
+use App::Repo::Agent qw< get_packages get_repos_url >;
 use open qw<:encoding(UTF-8)>;
 
 my %switch = ();
 $0 = "repo";
-getopts('d:hp', \%switch);
+getopts('d:r:hp', \%switch);
 
 
 sub start {
@@ -60,6 +62,18 @@ sub start {
 #plugin( 'Directory', root => "$base_dir" )->start('daemon', '-l', "http://*:3000");
 }
 
+sub printer {
+    my $url = shift;
+    my @p = @{get_packages($url)};
+    my %lenght = ();
+    for(@p){
+        my $number_align = 3 - length $_->{number};
+        my $random_offset = rand(int(15));
+        print " "x($random_offset) . "$_->{Name}" . colored(['yellow'],'__') . colored(['black on_yellow'],"v".$_->{Version}) . "\n";
+        #print " "x($random_offset) . "$_->{Name}" . colored(['yellow'],'__') . colored(['black on_yellow'],$_->{Version}) . colored(['black on_yellow'],"$_->{number}") . colored(['black on_yellow']," "x($number_align)) . "\n";
+    }
+}
+
 sub usage {
     say "\nUsage:\n\tstart:\t\t\trepo -d /path/to/deb";
     say "\trefresh packages\trepo -d ~/path/to/deb -p"; 
@@ -73,7 +87,9 @@ if(defined $switch{d}){
     start();
 } elsif(defined $switch{h}){
     usage();
-} 
+} elsif(defined $switch{r}){
+    printer($switch{r});
+}
 
 =head1 NAME
 
@@ -92,6 +108,8 @@ Pass full path to 'deb' directory containing Debian packages with -d parameter. 
 start:                  C<repo -d /path/to/deb>
 
 refresh packages:       C<repo -d /path/to/deb -p>
+
+list repo packages      C<repo -r http://repo.com/>
 
 usage:                  C<repo -h>
 
