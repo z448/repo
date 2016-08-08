@@ -1,3 +1,5 @@
+**UPDATE** use -r parameter to search repository `repo -r http://load.sh/cydia`
+
 # NAME
 
 **repo** - Creates list of Debian packages and starts APT repository on localhost:3000.
