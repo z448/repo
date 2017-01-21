@@ -22,5 +22,5 @@ WriteMakefile(
          'Mojolicious'   =>  '7.01',
     },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
-    clean => { FILES => 'App-repo*' },
+    clean => { FILES => 'App-Repo*' },
 );

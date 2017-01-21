@@ -61,7 +61,7 @@ my $content = sub {
     if($file =~ /\.deb/){
         my $file_size = -s "$dir/$file";
         copy("$dir/$file", "$stash/tmp");
-        system("cd $stash/tmp && perl -I$stash $stash/ar -x $file && tar -xf control.tar.gz");
+        system("cd $stash/tmp && ar -x $file && tar -xf control.tar.gz");
         open(my $fh,"<","$stash/tmp/control") || die "cant open $stash/tmp/control: $!";
         system("rm -rf $stash/tmp/*");
         while(<$fh>){

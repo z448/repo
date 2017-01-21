@@ -1,7 +1,7 @@
 package App::Repo::Agent;
 
 use 5.010;
-use Mojo::UserAgent;
+use LWP::Curl;
 use Data::Dumper;
 use Digest::SHA qw< sha1_hex sha256_hex >;
 use Digest::MD5 qw< md5_hex >;
@@ -23,79 +23,65 @@ App::Repo - creates Packages list and starts APT repository
 require Exporter;
 
 our @ISA = qw(Exporter);
-our @EXPORT_OK = qw< get_repos_url get_packages >;
+our @EXPORT_OK = ( 'printer' );
 our $VERSION = '0.01';
 
-$ENV{MOJO_NO_TLS} = 0;
-$ENV{MOJO_MAX_REDIRECTS} = 15;
 my $base_path = "$ENV{HOME}/.repo/stash";
 
-my $ua = Mojo::UserAgent->new;
-$ua->transactor->name('Telesphoreo APT-HTTP/1.0.592');
-
-sub get_repos_url {
-    my $url = 'https://raw.githubusercontent.com/jonluca/MasterRepo/master/MasterRepo.list';
-    my @repo_url = ();
-    my $tx = $ua->get("$url");
-    if (my $res = $tx->success) {
-        open(my $fh,'<',\$res->body);
-        while(<$fh>){
-            s/(.*deb\ )(.*?)(\ .*)/$2/;
-            push @repo_url, $2;
-        }
-        close $fh;
-        return \@repo_url;
-    }
-}
+my $curl = LWP::Curl->new(
+    user_agent   => 'Telesphoreo APT-HTTP/1.0.592',
+    #agent => 'Cydia/0.9 CFNetwork/711.4.6 Darwin/14.0.0',
+    timeout => 10,
+    maxredirs => 10,
+);
 
 sub get_packages {
-    my $repo_url = shift; 
-    $repo_url =~ s/\/$//;
+    my $repo_url = shift; $repo_url =~ s/\/$//;
     my @packages_list = qw( Packages Packages.bz2 Packages.gz );
 
     mkpath($base_path);
     for(@packages_list){
-        #my $packages_tmp_file = "$base_path/$_";
-        #say "packages_tmp_file: $packages_tmp_file" if $ENV{REPO_DEBUG};
-        #say "trying $repo_url/$_" if $ENV{REPO_DEBUG};;
+        my $packages_tmp_file = "$base_path/$_";
+        say "packages_tmp_file: $packages_tmp_file";
+        say "trying $repo_url/$_";
+        my $system = system("curl --user-agent \"Telesphoreo APT-HTTP/1.0.592\" -kLo $packages_tmp_file $repo_url/$_");
+        say "system: $system";
 
-        my $tx = $ua->get("$repo_url/$_");
-        #say "$repo_url/$_";
-        if (my $res = $tx->success) { 
-            return parse_control($res->body, "$_");
-            last;
-        } 
+        #my $res = $curl->get("$repo_url/$_");
+        #if($res->is_success){
+        #open(my $fh,"> :raw :bytes",$packages_tmp_file);
+        #        print $fh $res->content;
+        #        close $fh;
+        #        }
     }
+    return parse_control($repo_url, "Packages.gz");
 }
 
 sub parse_control {
-    my( $stream, $file_type ) = @_;
+    my( $repo_url, $packages_tmp_file ) = @_;
     my( @packages, %packages, $i ) = ();
-    open(my $fh,"> :raw :bytes", "$base_path/$file_type");
-    print $fh $stream;
-    close $fh;
 
-    if( $file_type =~ /\.gz/){
-        #say "gz exist";
-        system("mv $base_path/Packages.gz $base_path/Packages");
+    if( -f "$base_path/Packages.gz"){
+        say "gz exist";
+        system("gunzip -f $base_path/Packages.gz");
     } 
-    if( $file_type =~ /\.bz2/ ){
-        #say "bz2 exist";
+    if( -f "$base_path/Packages.bz2"){
+        say "bz2 exist";
         system("bzcat $base_path/Packages.bz2 > $base_path/Packages");
     }
 
     if( -f "$base_path/Packages"){
         open(my $fh, '<', "$base_path/Packages") || die "cant open $base_path/Packages: $!";
         while(<$fh>){ 
-            if( /\:/){ 
-                s/(.*?)(\:\ ?)(.*)/$1$2$3/;
-                my($key, $value) = ($1, $3); chomp $value; $key = lc $key;
+            if( /\:\ /){ 
+                s/(.*?)(\:\ )(.*)/$1$2$3/;
+                my($key, $value) = ($1, $3); chomp $value;
                 $packages{$key} = $value;
             } else { 
-                #$packages{url} = "$repo_url/$packages{Filename}";
-                #$packages{number} = $i++;
-                #$packages{repository} = $repo_url;
-                #$packages{t} = $repo_url;
+                $packages{url} = "$repo_url/$packages{Filename}";
+                $packages{number} = $i++;
+                $packages{repository} = $repo_url;
+                $packages{t} = $repo_url;
                 push @packages, { %packages };
             }
         }
@@ -105,21 +91,6 @@ sub parse_control {
 
 #print Dumper(get_packages("$ARGV[0]"));
 
-__DATA__
-
-sub printer {
-    my @p = @{get_packages(shift)};
-    my %lenght = ();
-    for(@p){
-        my $number_align = 3 - length $_->{number};
-        my $random_offset = rand(int(15));
-        print " "x($random_offset) . "$_->{name}" . colored(['yellow'],'__') . colored(['black on_yellow'],"$_->{number}") . colored(['black on_yellow']," "x($number_align)) . "\n";
-    }
-}
-
-printer("$ARGV[0]");
-
-__DATA__
 sub read_json {
     open(my $fh,"<", "$base_path/packages.json") || die "cant open: $base_path/packages.json: $!";
     my $json = <$fh>;
@@ -133,6 +104,15 @@ sub write_json {
     print $fh $json;
 }
 
+sub printer {
+    my @p = @{get_packages(shift)};
+    my %lenght = ();
+    for(@p){
+        print colored(['white on_cyan'],"$_->{number}") . " $_->{Name}" . colored(['blue']," - ");
+    }
+}
+
+
 #my @url = grep { $_->{Name} } @{get_packages("$ARGV[0]")};
 #for(@url){
 #    say $_->{url};
@@ -142,6 +122,7 @@ sub write_json {
 
 
 
+printer("$ARGV[0]");
 #for(@p){ say $_->{Name} };
 
 __DATA__
