@@ -59,14 +59,11 @@ my $content = sub {
     my( $dir, $file ) = @_;
     my @control = ();
 
-    #mkpath("$stash/tmp");
     if($file =~ /\.deb/){
         my $file_size = -s "$dir/$file";
-        #copy("$dir/$file", "$stash/tmp");
-        #system("mkdir -p $stash/tmp && cp $dir/$file $stash/tmp/ && cd $stash/tmp && ar -x $stash/tmp/$file && tar -xf $stash/tmp/control.tar.gz && cd -");
-        system("mkdir -p $stash/tmp && cp $dir/$file $stash/tmp/ && cd $stash/tmp && perl -I$stash/bin/ $stash/bin/ar -x $stash/tmp/$file && tar -xf $stash/tmp/control.tar.gz && cd -");
+        system("mkdir -p $stash/tmp && cp $dir/$file $stash/tmp/ && cd $stash/tmp && ar -x $stash/tmp/$file && tar -xf $stash/tmp/control.tar.gz && cd -");
+        #system("mkdir -p $stash/tmp && cp $dir/$file $stash/tmp/ && cd $stash/tmp && perl -I$stash/bin/ $stash/bin/ar -x $stash/tmp/$file && tar -xf $stash/tmp/control.tar.gz && cd -");
         open(my $fh,"<","$stash/tmp/control") || die "cant open $stash/tmp/control: $!";
-        system("rm -rf $stash/tmp/*");
         while(<$fh>){
             if(/^\n/){ next };
             chomp;
@@ -81,6 +78,7 @@ my $content = sub {
         print "$file\n";
         return \@control;
     } else { print "no deb file\n" }
+    system("rm -rf $stash/tmp");
 };
 
 my $find_deb = sub {
