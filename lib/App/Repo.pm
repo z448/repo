@@ -23,16 +23,18 @@ our $VERSION = '0.09';
 
 
 my @deb_files = ();
-my $url_base = 'https://api.metacpan.org/source';
-my $stash = "$ENV{HOME}/tmp/.repo";
+#my $url_base = 'https://api.metacpan.org/source';
+my $url_base = 'https://fastapi.metacpan.org/source';
+my $stash = "$ENV{HOME}/.repo";
+#my $stash = "$stash/bin/gc";
 
 sub init {
-    unless( -d "$ENV{HOME}/tmp/.repo" ){
-        mkpath( "$ENV{HOME}/tmp/.repo" );
-        print "\nUsing curl to get dependencies\n $ENV{HOME}/tmp/.repo <<<getopts.pl ";
-        system("curl -#kL $url_base/ZEFRAM/Perl4-CoreLibs-0.003/lib/getopts.pl > $ENV{HOME}/tmp/.repo/getopts.pl");
-        print " $ENV{HOME}/tmp/.repo <<<ar";
-        system("curl -#kL $url_base/BDFOY/PerlPowerTools-1.007/bin/ar > $ENV{HOME}/tmp/.repo/ar");
+    unless( -d "$stash/bin" ){
+        mkpath( "$stash/bin" );
+        print "\nUsing curl to get dependencies\n $stash/bin <<<getopts.pl ";
+        system("curl -#kL $url_base/ZEFRAM/Perl4-CoreLibs-0.003/lib/getopts.pl > $stash/bin/getopts.pl");
+        print " $stash/bin <<<ar";
+        system("curl -#kL $url_base/BDFOY/PerlPowerTools-1.007/bin/ar > $stash/bin/ar");
     }
 }; init();
 
@@ -57,11 +59,12 @@ my $content = sub {
     my( $dir, $file ) = @_;
     my @control = ();
 
-    mkpath("$stash/tmp");
+    #mkpath("$stash/tmp");
     if($file =~ /\.deb/){
         my $file_size = -s "$dir/$file";
-        copy("$dir/$file", "$stash/tmp");
-        system("cd $stash/tmp && ar -x $file && tar -xf control.tar.gz");
+        #copy("$dir/$file", "$stash/tmp");
+        system("mkdir -p $stash/tmp && cp $dir/$file $stash/tmp/ && cd $stash/tmp && ar -x $stash/tmp/$file && tar -xf $stash/tmp/control.tar.gz && cd -");
+        #system("mkdir -p $stash/tmp && cp $dir/$file $stash/tmp/ && cd $stash/tmp && perl -I$stash/bin/ $stash/bin/ar -x $stash/tmp/$file && tar -xf $stash/tmp/control.tar.gz && cd -");
         open(my $fh,"<","$stash/tmp/control") || die "cant open $stash/tmp/control: $!";
         system("rm -rf $stash/tmp/*");
         while(<$fh>){
@@ -75,9 +78,9 @@ my $content = sub {
         push @control, 'SHA1: ' . $digest->("$dir/$file")->{'sha1'};
         push @control, 'SHA256: ' . $digest->("$dir/$file")->{'sha256'};
         push @control, "\n";
+        print "$file\n";
         return \@control;
-    }
-    #} else { warn "no deb file" }
+    } else { print "no deb file\n" }
 };
 
 my $find_deb = sub {
