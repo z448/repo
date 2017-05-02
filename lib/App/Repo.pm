@@ -11,7 +11,7 @@ use strict;
 
 =head1 NAME
  
-App::Repo - creates Packages list and starts APT repository
+App::Repo - create debian repository
  
 =cut
 
@@ -23,20 +23,8 @@ our $VERSION = '0.10';
 
 
 my @deb_files = ();
-#my $url_base = 'https://api.metacpan.org/source';
 my $url_base = 'https://fastapi.metacpan.org/source';
 my $stash = "$ENV{HOME}/.repo";
-#my $stash = "$stash/bin/gc";
-
-sub init {
-    unless( -d "$stash/bin" ){
-        mkpath( "$stash/bin" );
-        print "\nUsing curl to get dependencies\n $stash/bin <<<getopts.pl ";
-        system("curl -#kL $url_base/ZEFRAM/Perl4-CoreLibs-0.003/lib/getopts.pl > $stash/bin/getopts.pl");
-        print " $stash/bin <<<ar";
-        system("curl -#kL $url_base/BDFOY/PerlPowerTools-1.007/bin/ar > $stash/bin/ar");
-    }
-}; init();
 
 my $digest = sub {
     my $file = shift;
@@ -62,7 +50,6 @@ my $content = sub {
     if($file =~ /\.deb/){
         my $file_size = -s "$dir/$file";
         system("mkdir -p $stash/tmp && cp $dir/$file $stash/tmp/ && cd $stash/tmp && ar -x $stash/tmp/$file && tar -xf $stash/tmp/control.tar.gz && cd -");
-        #system("mkdir -p $stash/tmp && cp $dir/$file $stash/tmp/ && cd $stash/tmp && perl -I$stash/bin/ $stash/bin/ar -x $stash/tmp/$file && tar -xf $stash/tmp/control.tar.gz && cd -");
         open(my $fh,"<","$stash/tmp/control") || die "cant open $stash/tmp/control: $!";
         while(<$fh>){
             if(/^\n/){ next };
@@ -78,7 +65,6 @@ my $content = sub {
         print "$file\n";
         return \@control;
     } else { print "no deb file\n" }
-    system("rm -rf $stash/tmp");
 };
 
 my $find_deb = sub {
