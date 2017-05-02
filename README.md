@@ -32,7 +32,7 @@ make install
 
 # OPTIONS
 
--d parameter takes full path to `deb` directory containing .deb files. Repo will generate 'Packages.gz' file in a same directory where 'deb' is located and starts APT repository on localhost:3000. To stop repository search for 'repo' process (`ps -ef | grep repo`) and kill it. 
+-d parameter takes full path to `deb` directory containing .deb files. Repo will generate 'Packages.gz' file in a same directory where 'deb' is located and starts APT repository on localhost:3000.
 
 start:                              `repo -d /path/to/deb`
 
