@@ -14,7 +14,7 @@ use open qw<:encoding(UTF-8)>;
 
 my %switch = ();
 $0 = "repo";
-getopts('d:hp', \%switch);
+getopts('s:d:hp', \%switch);
 
 
 sub start {
@@ -46,7 +46,7 @@ sub start {
 
     if( defined $switch{p} ){ say "refreshed"; return }
 
-    say "starting repo";
+    say "starting $0: PID $$";
 
     daemonize();
 
@@ -61,19 +61,60 @@ sub start {
 }
 
 sub usage {
-    say "\nUsage:\n\tstart:\t\t\trepo -d /path/to/deb";
-    say "\trefresh packages\trepo -d ~/path/to/deb -p"; 
-    say "\thelp:\t\t\trepo -h";
-    say "\tdocumentation:\t\tperldoc repo";
-    say "\n\n";
+    my $help = <<'END_MESSAGE';
+
+    USAGE:
+            -start repo
+            repo -d /path/to/deb
+
+            -stop repo
+            repo -stop
+
+            -check if repo is running
+            repo -status
+
+            -update packages list
+            repo -d /path/to/deb -p
+
+            -see documentation
+            perldoc repo
+
+            -see this help 
+            repo -h
+END_MESSAGE
+
+    print $help;
 }
+
 
 
 if(defined $switch{d}){
     start();
 } elsif(defined $switch{h}){
     usage();
-} 
+} elsif( defined $switch{s} ){
+    my $pids = ' ';
+    my @ps = grep{ /repo/ } qx{ ps aux };
+    for(@ps){
+        push my @pid, split(" ", $_);
+        if( $pid[10] eq $0 ){
+            $pids .= " $pid[1]" unless $pid[1] eq $$;
+        }
+    }
+
+    if($switch{s} eq 'top'){
+        system("kill -9 $pids");
+        say "killed $0: PID $pids";
+        exit;
+    }
+
+    if($switch{s} eq 'tatus'){
+        if($pids eq ' '){
+            say "$0: not running";
+        } else { say "$0 running: PID $pids" }
+    }
+}
+
 
 =head1 NAME
 
