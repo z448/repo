@@ -4,7 +4,7 @@
 
 # DESCRIPTION 
 
-**repo** creates MD5, SHA1 and SHA256 hashes of each package in `deb` directory, checks control file and use it to create `Packages.gz` file needed by APT client to read content of repository, then starts repository running on Mojolicious server ( **localhost:3000** ).
+**repo** creates MD5, SHA1 and SHA256 hashes of each package in `deb` directory, checks control file and use it to create `Packages.gz` file needed by APT client to read content of repository, then starts repository running on Mojolicious server ( port 3000 ).
 
 # GIF
 
@@ -32,13 +32,17 @@ make install
 
 # OPTIONS
 
--d parameter takes full path to `deb` directory containing .deb files. Repo will generate 'Packages.gz' file in a same directory where 'deb' is located and starts APT repository on localhost:3000.
+-d parameter takes full path to `deb` directory containing .deb files. Repo will generate 'Packages.gz' file in a same directory where 'deb' is located and starts APT repository on port 3000.
 
-start:                              `repo -d /path/to/deb`
+start:                  "repo -d /path/to/deb"
 
-refresh packages:                   `repo -d /path/to/deb -p`
+stop:                   "repo -stop"
 
-usage:                              `repo -h`
+status:                 "repo -status"
+
+update packages list:   "repo -d /path/to/deb -p"
+
+help:                   "repo -h"
 
 # AUTHOR
 
