@@ -46,7 +46,7 @@ sub start {
 
     if( defined $switch{p} ){ say "refreshed"; return }
 
-    say "starting $0: PID $$";
+    say "started $0";
 
     daemonize();
 
