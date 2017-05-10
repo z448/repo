@@ -54,13 +54,17 @@ sub start {
                 open(my $fh,'<',"$dir/Release")|| die "cant open file:$!";
                 while(<$fh>){
                     if( /^(MD5|SHA)/ ){ last }
+                    next if $_ =~ /^Date/;
                     chomp;
                     push @line, $_;
                 }
                 close $fh;
             } else { die "missing Release file in $dir\nuse -t option to generate Release file template" }
+
+            my $date = `LC_ALL=en_US date -u '+%a, %d %b %Y %H:%M:%S %Z'`; chomp $date;
             open(my $fh,'>',"$dir/Release") || die "cant open file:$!";
             print $fh join( "\n",@line );
+            print $fh "\nDate: $date";
             print $fh "\nMD5Sum:\n";
             for my $file( @file ){
                 my $digest = digest("$dir/$file");
