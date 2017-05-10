@@ -64,6 +64,7 @@ sub start {
             }
             print "\n";
             close $fh;
+            # gpg -abs --default-key 1D87CAB2 -o $dir/Release.gpg $dir/Release
     };
 
     $release->($base_dir);
