@@ -31,7 +31,7 @@ sub start {
         }
     };
     close $fh;
-    system("cd $base_dir && cp Packages Packages.txt && gzip Packages");
+    system("cd $base_dir && gzip -c Packages > Packages.gz");
 
     my $repo_icon_path = sub {
         my $repo_lib_dir = `perldoc -l App::Repo`; chomp $repo_lib_dir;
@@ -44,6 +44,29 @@ sub start {
         system("cp $repo_icon $base_dir/");
     }
 
+
+    my $release = sub {
+            my( $dir ) = @_;
+            my @file = ( "Packages", "Packages.gz" );
+            
+            open(my $fh,'>>',"$dir/Release") || die "cant open file:$!";
+            print $fh "\nMD5Sum:\n";
+            for my $file( @file ){
+                my $digest = digest("$dir/$file");
+                my $size = -s "$dir/$file";
+                print $fh ' ' . $digest->{'md5'} . '  ' . $size . ' ' . $file . "\n";
+            }
+            print $fh "SHA1:\n";
+            for my $file( @file ){
+                my $digest = digest("$dir/$file");
+                my $size = -s "$dir/$file";
+                print $fh ' ' . $digest->{'sha1'} . '  ' . $size . ' ' . $file . "\n";
+            }
+            print "\n";
+            close $fh;
+    };
+
+    $release->($base_dir);
     if( defined $switch{p} ){ say "refreshed"; return }
 
     say "started $0";
@@ -52,7 +75,7 @@ sub start {
 
     app->static->paths->[0] = $base_dir;
     any '/' => sub {
-        shift->reply->static('Packages.txt');
+        shift->reply->static('Packages');
     };
 
     app->start('daemon');

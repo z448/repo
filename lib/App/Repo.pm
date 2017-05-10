@@ -18,7 +18,7 @@ App::Repo - create debian repository
 require Exporter;
 
 our @ISA = qw(Exporter);
-our @EXPORT_OK = ( 'digest', 'packages', 'release' );
+our @EXPORT_OK = ( 'digest', 'packages' );
 our $VERSION = '0.12';
 
 
@@ -80,26 +80,6 @@ my $find_deb = sub {
     }
     return \@packages;
 };
-
-my $release = sub {
-		my( $dir ) = @_;
-		my @file = ( "Packages", "Packages.gz" );
-		
-		open(my $fh,'>>',"$dir/Release") || die "cant open file:$!";
-		print $fh "\nMD5Sum:\n ";
-		for( @file ){
-			print $fh $digest->("$dir/$_")->{'md5'} . '  ' . -s "$dir/$_" . ' ' . $_ . "\n ";
-		}
-		print $fh "SHA1:\n ";
-		for( @file ){
-			print $fh $digest->("$dir/$_")->{'sha1'} . '  ' . -s "$dir/$_" . ' ' . $_ . "\n";
-		}
-		close $fh;
-};
-
-sub release {
-		$release->(shift);
-}
 
 sub digest {
     $digest->(shift);
