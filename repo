@@ -14,7 +14,7 @@ use open qw<:encoding(UTF-8)>;
 
 my %switch = ();
 $0 = "repo";
-getopts('s:d:hp', \%switch);
+getopts('s:d:p:hr', \%switch);
 
 
 sub start {
@@ -68,7 +68,7 @@ sub start {
     };
 
     $release->($base_dir);
-    if( defined $switch{p} ){ say "refreshed"; return }
+    if( defined $switch{r} ){ say "refreshed"; return }
 
     say "started $0";
 
@@ -79,7 +79,8 @@ sub start {
         shift->reply->static('Release');
     };
 
-    app->start('daemon');
+    my $port = $switch{p} || "3000";
+    app->start('daemon','-l',"http://*:$port");
 
 #plugin( 'Directory', root => "$base_dir" )->start('daemon', '-l', "http://*:3000");
 }
@@ -88,23 +89,13 @@ sub usage {
     my $help = <<'END_MESSAGE';
 
     USAGE:
-            -start repo
-            repo -d /path/to/deb
+            start repo : repo -d /path/to/deb
+ start repo on port 80 : repo -d /path/to/deb -p 80
+             stop repo : repo -stop 
+          check status : repo -status 
+      refresh packages : repo -d /path/to/deb -r
+         documentation : perldoc repo
 
-            -stop repo
-            repo -stop
-
-            -check if repo is running
-            repo -status
-
-            -update packages list
-            repo -d /path/to/deb -p
-
-            -see documentation
-            perldoc repo
-
-            -see this help 
-            repo -h
 END_MESSAGE
 
     print $help;
@@ -142,25 +133,23 @@ if(defined $switch{d}){
 
 =head1 NAME
 
-repo - Creates list of Debian packages and starts APT repository on port 3000.
+repo - Create APT repository
 
 =head1 DESCRIPTION 
 
-'repo' creates MD5, SHA1 and SHA256 hashes of each package in 'deb' directory, checks control file and use it to create Packages.gz file needed by APT client to read content of repository, then starts repository running on Mojolicious server ( port 3000 ).
+'repo' creates MD5, SHA1 and SHA256 hashes of each package in 'deb' directory, checks control file and use it to create Packages.gz file needed by APT client to read content of repository and starts repository running on Mojolicious server ( by default on port 3000 ).
 
 =head1 OPTIONS
 
 Pass full path to 'deb' directory containing Debian packages with -d parameter. Repo will generate 'Packages.gz' file in a same directory where 'deb' is located and will run in background. When deb direcroy content is changed use -r option to update packages list without need to restart repo.
 
-start:                  C<repo -d /path/to/deb>
-
-stop:                   C<repo -stop>
-
-status:                 C<repo -status>
-
-update packages list:   C<repo -d /path/to/deb -p>
-
-help:                   C<repo -h>
+            start repo : repo -d /path/to/deb
+ start repo on port 80 : repo -d /path/to/deb -p 80
+             stop repo : repo -stop
+          check status : repo -status
+      refresh packages : repo -d /path/to/deb -r
+         documentation : perldoc repo
+                  help : repo -h
 
 =head1 AUTHOR
 
