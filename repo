@@ -56,11 +56,11 @@ sub start {
                 my $size = -s "$dir/$file";
                 print $fh ' ' . $digest->{'md5'} . '  ' . $size . ' ' . $file . "\n";
             }
-            print $fh "SHA1:\n";
+            print $fh "SHA256:\n";
             for my $file( @file ){
                 my $digest = digest("$dir/$file");
                 my $size = -s "$dir/$file";
-                print $fh ' ' . $digest->{'sha1'} . '  ' . $size . ' ' . $file . "\n";
+                print $fh ' ' . $digest->{'sha256'} . '  ' . $size . ' ' . $file . "\n";
             }
             print "\n";
             close $fh;
@@ -75,7 +75,7 @@ sub start {
 
     app->static->paths->[0] = $base_dir;
     any '/' => sub {
-        shift->reply->static('Packages');
+        shift->reply->static('Release');
     };
 
     app->start('daemon');
