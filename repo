@@ -14,7 +14,7 @@ use open qw<:encoding(UTF-8)>;
 
 my %switch = ();
 $0 = "repo";
-getopts('s:d:p:hr', \%switch);
+getopts('s:d:p:hrt', \%switch);
 
 
 sub start {
@@ -48,8 +48,19 @@ sub start {
     my $release = sub {
             my( $dir ) = @_;
             my @file = ( "Packages", "Packages.gz" );
-            
-            open(my $fh,'>>',"$dir/Release") || die "cant open file:$!";
+
+            my @line = ();
+            if(-f "$dir/Release"){
+                open(my $fh,'<',"$dir/Release")|| die "cant open file:$!";
+                while(<$fh>){
+                    if( /^(MD5|SHA)/ ){ last }
+                    chomp;
+                    push @line, $_;
+                }
+                close $fh;
+            } else { die "missing Release file in $dir\nuse -t option to generate Release file template" }
+            open(my $fh,'>',"$dir/Release") || die "cant open file:$!";
+            print $fh join( "\n",@line );
             print $fh "\nMD5Sum:\n";
             for my $file( @file ){
                 my $digest = digest("$dir/$file");
@@ -89,12 +100,13 @@ sub usage {
     my $help = <<'END_MESSAGE';
 
     USAGE:
-            start repo : repo -d /path/to/deb
- start repo on port 80 : repo -d /path/to/deb -p 80
-             stop repo : repo -stop 
-          check status : repo -status 
-      refresh packages : repo -d /path/to/deb -r
-         documentation : perldoc repo
+                 start repo : repo -d /path/to/deb
+      start repo on port 80 : repo -d /path/to/deb -p 80
+                  stop repo : repo -stop 
+               check status : repo -status 
+           refresh packages : repo -d /path/to/deb -r
+              documentation : perldoc repo
+ print Release file template: repo -t
 
 END_MESSAGE
 
@@ -128,6 +140,8 @@ if(defined $switch{d}){
             say "$0: not running";
         } else { say "$0 running: PID $pids" }
     }
+} elsif( defined $switch{t} ){
+    print "Origin: \nLabel: \nVersion: \nArchitectures: \nDescription: \n";
 }
 
 
@@ -143,13 +157,14 @@ repo - Create APT repository
 
 Pass full path to 'deb' directory containing Debian packages with -d parameter. Repo will generate 'Packages.gz' file in a same directory where 'deb' is located and will run in background. When deb direcroy content is changed use -r option to update packages list without need to restart repo.
 
-            start repo : repo -d /path/to/deb
- start repo on port 80 : repo -d /path/to/deb -p 80
-             stop repo : repo -stop
-          check status : repo -status
-      refresh packages : repo -d /path/to/deb -r
-         documentation : perldoc repo
-                  help : repo -h
+                 start repo : repo -d /path/to/deb
+      start repo on port 80 : repo -d /path/to/deb -p 80
+                  stop repo : repo -stop 
+               check status : repo -status 
+           refresh packages : repo -d /path/to/deb -r
+              documentation : perldoc repo
+ print Release file template: repo -t
+                        help: repo -h
 
 =head1 AUTHOR
 
