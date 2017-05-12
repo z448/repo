@@ -14,7 +14,7 @@ use open qw<:encoding(UTF-8)>;
 
 my %switch = ();
 $0 = "repo";
-getopts('s:d:p:hrt', \%switch);
+getopts('s:d:p:ghrt', \%switch);
 
 
 sub start {
@@ -79,10 +79,12 @@ sub start {
             }
             print "\n";
             close $fh;
-            # gpg -abs --default-key 1D87CAB2 -o $dir/Release.gpg $dir/Release
     };
 
     $release->($base_dir);
+
+    system("if [ -f \"$base_dir/Release.gpg\" ];then rm $base_dir/Release.gpg;fi && gpg -abs -o $base_dir/Release.gpg $base_dir/Release") if defined $switch{g};
+
     if( defined $switch{r} ){ say "refreshed"; return }
 
     say "started $0";
@@ -91,7 +93,9 @@ sub start {
 
     app->static->paths->[0] = $base_dir;
     any '/' => sub {
-        shift->reply->static('Release');
+        my $file = "$base_dir/Release";
+        $file = "$base_dir/index.html" if -f "$base_dir/index.html";
+        shift->reply->static("$file");
     };
 
     my $port = $switch{p} || "3000";
@@ -104,13 +108,14 @@ sub usage {
     my $help = <<'END_MESSAGE';
 
     USAGE:
-                 start repo : repo -d /path/to/deb
-      start repo on port 80 : repo -d /path/to/deb -p 80
-                  stop repo : repo -stop 
-               check status : repo -status 
-           refresh packages : repo -d /path/to/deb -r
-              documentation : perldoc repo
- print Release file template: repo -t
+             start repo: repo -d /path/to/deb
+             start repo and sign Release file : repo -d /path/to/deb
+             start repo on port 80 : repo -d /path/to/deb -p 80
+             stop repo : repo -stop 
+             check status : repo -status 
+             refresh packages : repo -d /path/to/deb -r
+             documentation : perldoc repo
+             print Release file template: repo -t
 
 END_MESSAGE
 
