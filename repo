@@ -83,7 +83,7 @@ sub start {
 
     $release->($base_dir);
 
-    system("if [ -f \"$base_dir/Release.gpg\" ];then rm $base_dir/Release.gpg;fi && gpg -abs -o $base_dir/Release.gpg $base_dir/Release") if defined $switch{g};
+    system("if [ -f \"$base_dir/Release.gpg\" ];then rm $base_dir/Release.gpg;fi; gpg -abs -o $base_dir/Release.gpg $base_dir/Release") if defined $switch{g};
 
     if( defined $switch{r} ){ say "refreshed"; return }
 
@@ -93,9 +93,9 @@ sub start {
 
     app->static->paths->[0] = $base_dir;
     any '/' => sub {
-        my $file = "$base_dir/Release";
-        $file = "$base_dir/index.html" if -f "$base_dir/index.html";
-        shift->reply->static("$file");
+        my $file = "Release";
+        $file = "index.html" if -f "$base_dir/index.html";
+        shift->reply->static($file);
     };
 
     my $port = $switch{p} || "3000";
