@@ -46,11 +46,13 @@ my $digest = sub {
 my $content = sub {
     my( $dir, $file ) = @_;
     my @control = ();
-
+    
     if($file =~ /\.deb/){
         my $file_size = -s "$dir/$file";
-        system("mkdir -p $stash/tmp && cp $dir/$file $stash/tmp/ && cd $stash/tmp && ar -x $stash/tmp/$file && tar -xf $stash/tmp/control.tar.gz && cd -");
+        system("mkdir -p $stash/tmp && cp $dir/$file $stash/tmp/ && cd $stash/tmp && ar -x $stash/tmp/$file && tar -xf $stash/tmp/control.tar.gz");
+        #system("mkdir -p $stash/tmp && cp $dir/$file $stash/tmp/ && cd $stash/tmp && ar -x $stash/tmp/$file && tar -xf $stash/tmp/control.tar.gz && cd -");
         open(my $fh,"<","$stash/tmp/control") || die "cant open $stash/tmp/control: $!";
+        print '.';
         while(<$fh>){
             if(/^\n/){ next };
             chomp;
@@ -62,7 +64,7 @@ my $content = sub {
         push @control, 'SHA1: ' . $digest->("$dir/$file")->{'sha1'};
         push @control, 'SHA256: ' . $digest->("$dir/$file")->{'sha256'};
         push @control, "\n";
-        print "$file\n";
+        #print "$file\n";
         return \@control;
     } else { print "no deb file\n" }
 };
