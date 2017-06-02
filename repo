@@ -108,7 +108,7 @@ sub usage {
 
     USAGE:
              start repo: repo -d /path/to/deb
-             start repo and sign Release file : repo -d /path/to/deb
+             start repo and sign Release file : repo -d /path/to/deb -g
              start repo on port 80 : repo -d /path/to/deb -p 80
              stop repo : repo -stop 
              check status : repo -status 
