@@ -160,7 +160,7 @@ repo - Create APT repository
 
 =head1 DESCRIPTION 
 
-'repo' creates MD5, SHA1 and SHA256 hashes of each package in 'deb' directory, checks control file and use it to create Packages.gz file needed by APT client to read content of repository. Then it creates Release file containing hashes of Packages/Packages.gz files and starts repository using Mojolicious server ( by default on port 3000 ).
+'repo' creates MD5, SHA1 and SHA256 hashes of each package in 'deb' directory, checks control file and use it to create Packages file needed by APT client to read content of repository. Then it creates Release file containing hashes of Packages files and starts repository using Mojolicious server ( by default on port 3000 ).
 
 =head1 OPTIONS
 
